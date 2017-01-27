@@ -1,11 +1,12 @@
 const restify = require('restify');
+const plugins = require('restify-plugins');
 var proxy = require('./proxy');
 
 const server = restify.createServer({
     name: 'crossorigin.me'
 });
 
-const freeTier = restify.throttle({
+const freeTier = plugins.throttle({
     rate: 3,
     burst: 10,
     ip: true,
@@ -17,13 +18,6 @@ const freeTier = restify.throttle({
     }
 });
 
-// CORS configuration
-
-server.opts('/', proxy.opts);
-
-// Request handler configuration (for free tier)
-server.get(/^\/(https?:\/\/.+)/, freeTier, proxy.get);
-server.post(/^\/(http:\/\/.+)/, freeTier, proxy.post);
-server.put(/^\/(http:\/\/.+)/, freeTier, proxy.put);
+server.pre(freeTier, proxy.get)
 
 module.exports = server;
