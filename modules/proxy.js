@@ -1,107 +1,148 @@
-const request = require('request');
+const request = require('request')
+const fetch = require('node-fetch')
+const URL = require('url')
 
-let requireHeader = [
-    'origin',
-    'x-requested-with',
-];
-let clientHeadersBlacklist = new Set([
-    'host',
-    'cookie',
-]);
-let serverHeadersBlacklist = new Set([
-    'set-cookie',
-    'connection',
-]);
+
+  request({
+    method: 'GET',
+    url: 'http://httpbin.org/post',
+
+    har: {
+      url: 'http://httpbin.org/post',
+      method: 'POST',
+      headers: [
+        {
+          name: 'content-type',
+          value: 'application/x-www-form-urlencoded'
+        }
+      ],
+      postData: {
+        mimeType: 'application/x-www-form-urlencoded',
+        params: [
+          {
+            name: 'foo',
+            value: 'bar'
+          },
+          {
+            name: 'hello',
+            value: 'world'
+          }
+        ]
+      }
+    }
+  })
+  .on('response', page => {
+    console.log(page.statusCode)
+    //
+    // for (let header in page.headers)
+    //   res.header(header, page.headers[header])
+    //
+    // res.header('Access-Control-Expose-Headers', Object.keys(page.headers).join(', '))
+    // res.header('Access-Control-Expose-Headers', Object.keys(page.headers).join(', '))
+  })
+  .on('data', d => console.log(d+''))
+
+
 
 /*
 get handler handles standard GET reqs as well as streams
 */
 function get (req, res, next) {
+  // let query = new URLSearchParams(req.url)
+  let {
+    addReqHeaders,
+    addResHeaders,
+    setResHeaders,
+    deleteResHeaders,
+    method = req.method,
+    body,
+    url
+  } = req.query
 
-    res.header('Access-Control-Allow-Origin', '*'); // Actually do the CORS thing! :)
+  // res.header('Access-Control-Allow-Origin', req.headers.origin)
 
-    var url = req.params[0];
-
-    // require CORS header
-    if (!requireHeader.some(header => req.headers[header])) {
-        res.statusCode = 403;
-        return res.end('Origin: header is required');
-    }
-
-    // TODO redirect same origin
-    /* from cors-anywhere: boolean redirectSameOrigin - If true, requests to
-     * URLs from the same origin will not be proxied but redirected. The
-     * primary purpose for this option is to save server resources by
-     * delegating the request to the client (since same-origin requests should
-     * always succeed, even without proxying). */
-
-    // forward client headers to server
-    var headers = {};
-    for (var header in req.headers) {
-        if (!clientHeadersBlacklist.has(header.toLowerCase())) {
-            headers[header] = req.headers[header];
+  request({
+    har: {
+      url: 'http://www.mockbin.com/har',
+      method: 'POST',
+      headers: [
+        {
+          name: 'content-type',
+          value: 'application/x-www-form-urlencoded'
         }
+      ],
+      postData: {
+        mimeType: 'application/x-www-form-urlencoded',
+        params: [
+          {
+            name: 'foo',
+            value: 'bar'
+          },
+          {
+            name: 'hello',
+            value: 'world'
+          }
+        ]
+      }
     }
-    var forwardedFor = req.headers['X-Fowarded-For'];
-    headers['X-Fowarded-For'] = (forwardedFor ? forwardedFor + ',' : '') + req.connection.remoteAddress;
+  })
+  .on('response', page => {
+    res.statusCode = page.statusCode;
 
-    var data = 0; // This variable contains the size of the data (for limiting file size)
-    var limit = 2e6; //TODO: change this to something different depending on tier. It's fine for now.
-    request
-        .get(url, {headers}) // GET the document that the user specified
-        .on('response', function (page) {
-            res.statusCode = page.statusCode;
+    for (let header in page.headers)
+      res.header(header, page.headers[header])
 
-            // if the page already supports cors, redirect to the URL directly
-            if (page.headers['access-control-allow-origin'] === '*') { // TODO is this best?
-                res.redirect(url, next);
-            }
+    res.header('Access-Control-Expose-Headers', Object.keys(page.headers).join(', '))
+    res.header('Access-Control-Expose-Headers', Object.keys(page.headers).join(', '))
+    res.flushHeaders()
 
-            // include only desired headers
-            for (var header in page.headers) {
-                if (!serverHeadersBlacklist.has(header)) {
-                    res.header(header, page.headers[header]);
-                }
-            }
-            // must flush here -- otherwise pipe() will include the headers anyway!
-            res.flushHeaders();
-        })
-        .on('data', function (chunk) {
-            data += chunk.length;
-            if (data > limit){
-                res.abort(); // kills response and request cleanly
-            }
-        })
-        .on('end', function (){
-            res.end(); // End the response when the stream ends
-        })
-        .pipe(res); // Stream requested url to response
-    next();
-}
-
-/*
-post and put handlers both handle sending data to servers (NOT FINISHED YET)
-*/
-function post (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*'); // Actually do the CORS thing! :)
-    next();
-}
-
-function put (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*'); // Actually do the CORS thing! :)
-    next();
+    response.on('data', data => {
+      console.log('received ' + data)
+    })
+  })
 }
 
 /*
 opts handler allows us to use our own CORS preflight settings
 */
 function opts (req, res, next) { // Couple of lines taken from http://stackoverflow.com/questions/14338683
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET'); // Only allow GET for now
-    res.header('Access-Control-Allow-Headers', req.header('Access-Control-Request-Headers'));
-    res.header('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hrs if supported
-    res.send(200);
-    next();
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Methods', 'GET') // Only allow GET for now
+    res.header('Access-Control-Allow-Headers', '*')
+    res.header('Access-Control-Max-Age', '86400') // Cache preflight for 24 hrs if supported
+    res.send(200)
+    next()
 }
 
-module.exports = {get, post, put, opts};
+module.exports = {get, opts}
+
+/*
+var params = new URLSearchParams
+params.append('url', url)
+
+// additional headers to include in the request
+// Normaly you can use headers but simple href can't add them and ajax blacklist
+// cookies, origin & Referer
+params.set('addReqHeaders', JSON.stringify(Object|Array))
+
+// additional headers to include in the response
+// eg: add content-disposition header to save a file...
+params.set('addResHeaders', JSON.stringify(Object|Array))
+
+// overides response headers (can be used to overide content-type text/plain to text/javascript)
+params.set('setResHeaders', JSON.stringify(Object|Array))
+
+// delete response headers
+params.set('deleteResHeaders', 'text/javascript')
+
+// Overide http method (can be used to convert a post request to a get if you want to show a link instead)
+params.set('method', 'post')
+
+// will only be used if the above method is not undefined|GET|HEAD
+params.set('body', 'foo')
+
+
+fetch(proxy + '?' + params, {
+
+})
+*/

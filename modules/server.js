@@ -1,13 +1,13 @@
-const restify = require('restify');
-var proxy = require('./proxy');
+const restify = require('restify')
+var proxy = require('./proxy')
 
 const server = restify.createServer({
-    name: 'crossorigin.me'
-});
+    name: 'cors-adv-proxy'
+})
 
 const freeTier = restify.throttle({
     rate: 3,
-    burst: 10,
+    burst: 100,
     xff: true,
     overrides: {
         '192.168.1.1': {
@@ -15,17 +15,24 @@ const freeTier = restify.throttle({
             burst: 0
         }
     }
-});
+})
 
-// CORS configuration
+// server.use(restify.CORS())
+server.use(restify.queryParser())
 
-server.opts('/', proxy.opts);
+server.opts('/', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, HEAD, DELETE, OPTIONS')
+  res.header('Access-Control-Allow-Headers', req.header('Access-Control-Request-Headers'))
+  res.send(200)
+  return next()
+})
 
-// Request handler configuration (for free tier)
-server.get(/^\/(https?:\/\/.+)/, freeTier, proxy.get);
+server.use(freeTier)
+server.get('/', proxy.get)
+server.post('/', proxy.get)
+server.del('/', proxy.get)
+server.put('/', proxy.get)
+server.head('/', proxy.get)
 
-// These aren't *quite* ready for prime time
-//server.post(/^\/(http:\/\/.+)/, freeTier, proxy.post);
-//server.put(/^\/(http:\/\/.+)/, freeTier, proxy.put);
-
-module.exports = server;
+module.exports = server
