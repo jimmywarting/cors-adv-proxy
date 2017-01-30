@@ -1,7 +1,7 @@
 {
-  "name": "crossorigin.me",
+  "name": "cors-adv-proxy",
   "version": "2.0.0",
-  "description": "A CORS proxy for everyone",
+  "description": "A advanced CORS proxy for everyone",
   "main": "index.js",
   "scripts": {
     "test": "npm run lint && npm run unit",
@@ -11,17 +11,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/technoboy10/crossorigin.me.git"
+    "url": "git+https://github.com/jimmywarting/cors-adv-proxy.git"
   },
   "keywords": [
     "cors"
   ],
-  "author": "Connor Hudson",
+  "author": "Jimmy Wärting",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/technoboy10/crossorigin.me/issues"
+    "url": "https://github.com/jimmywarting/cors-adv-proxy/issues"
   },
-  "homepage": "https://crossorigin.me",
   "devDependencies": {
     "mocha": "3.1.2",
     "supertest": "2.0.1"
@@ -29,7 +28,6 @@
   "dependencies": {
     "fetch-headers": "^2.0.0",
     "install": "^0.8.4",
-    "npm": "^4.1.2",
     "request": "2.79.0",
     "restify": "^5.0.0-beta-4.0",
     "restify-plugins": "^1.5.1",
