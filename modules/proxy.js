@@ -143,9 +143,7 @@ function get (req, res, next) {
 
   // 1.6
   if (params.has('body')) {
-    body = new Readable()
-    body.push(params.has('body'))
-    body.push(null)
+    body = Buffer.from(params.get('body'))
   } else {
     body = req
   }
@@ -156,9 +154,11 @@ function get (req, res, next) {
     headers[k] = v
   }
 
+  req.headers = headers
   // 1.8
-  var opts = {url, headers, method, followRedirect}
-  body.pipe(request(opts) // GET the document that the user specified
+  var opts = {url, headers, method, followRedirect, body}
+
+  request(opts) // GET the document that the user specified
     .on('response', page => {
       res.statusCode = page.statusCode;
 
@@ -202,7 +202,7 @@ function get (req, res, next) {
 
       // must flush here -- otherwise pipe() will include the headers anyway!
       res.flushHeaders()
-    })).pipe(res)
+    }).pipe(res)
 }
 
 /*
