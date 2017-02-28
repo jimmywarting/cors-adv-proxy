@@ -39,16 +39,16 @@ function get (req, res, next) {
   let method = params.get('method') || req.method // 1.5
   let body
   let followRedirect = !params.get('noFollow') // 1.7
-  let deleteResHeader = []
-  let appendResHeader = []
-  let setResHeader = []
+  let deleteResHeaders = []
+  let appendResHeaders = []
+  let setResHeaders = []
 
 
 
   // Validate deleteResHeader
-  if (params.has('deleteResHeader')) {
+  if (params.has('deleteResHeaders')) {
     try {
-      let deleteResHeader = JSON.parse(params.get('deleteReqHeader'))
+      let deleteResHeaders = JSON.parse(params.get('deleteReqHeaders'))
     } catch (e) {
       res.statusCode = 403
       res.header('Access-Control-Allow-Origin', '*')
@@ -57,20 +57,19 @@ function get (req, res, next) {
   }
 
   // Validate deleteResHeader
-  if (params.has('appendResHeader')) {
+  if (params.has('appendResHeaders')) {
     try {
-      appendResHeader = new Headers(JSON.parse(params.get('appendResHeaders')))
+      appendResHeaders = new Headers(JSON.parse(params.get('appendResHeaders')))
     } catch (e) {
       res.statusCode = 403
       res.header('Access-Control-Allow-Origin', '*')
       return res.end('Failed to construct `new Headers` with appendResHeaders value')
     }
   }
-
   // Validate setResHeader
-  if (params.has('setResHeader')) {
+  if (params.has('setResHeaders')) {
     try {
-      setResHeader = new Headers(JSON.parse(params.get('setResHeaders')))
+      setResHeaders = new Headers(JSON.parse(params.get('setResHeaders')))
     } catch (e) {
       res.statusCode = 403
       res.header('Access-Control-Allow-Origin', '*')
@@ -175,20 +174,19 @@ function get (req, res, next) {
       // TODO: maybe ignore response header
 
       // 2.1
-      for (let key of deleteResHeader) {
+      for (let key of deleteResHeaders) {
         responseHeaders.delete(key)
       }
 
       // 2.2
-      for (let [key, val] of appendResHeader) {
+      for (let [key, val] of appendResHeaders) {
         responseHeaders.append(key, val)
       }
 
       // 2.3
-      for (let [key, val] of setResHeader) {
+      for (let [key, val] of setResHeaders) {
         responseHeaders.set(key, val)
       }
-
 
       /*
        * Override everything else and expose all headers
