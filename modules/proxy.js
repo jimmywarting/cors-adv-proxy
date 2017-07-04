@@ -30,7 +30,7 @@ const Readable = require('stream').Readable
 */
 function get (req, res, next) {
   if(req.method.toLowerCase() === 'options') return opts(req, res)
-  console.log(1)
+
   let {url} = req
   let search = url.substr(url.indexOf('?') + 1)
   let params = new URLSearchParams(search)
@@ -43,7 +43,7 @@ function get (req, res, next) {
   let appendResHeaders = []
   let setResHeaders = []
 
-  console.log(2)
+
   // Validate deleteResHeader
   if (params.has('deleteResHeaders')) {
     try {
@@ -54,7 +54,7 @@ function get (req, res, next) {
       return res.end('Expected deleteResHeader to be an array with strings')
     }
   }
-  console.log(3)
+
 
   // Validate deleteResHeader
   if (params.has('appendResHeaders')) {
@@ -66,7 +66,7 @@ function get (req, res, next) {
       return res.end('Failed to construct `new Headers` with appendResHeaders value')
     }
   }
-  console.log(4)
+
   // Validate setResHeader
   if (params.has('setResHeaders')) {
     try {
@@ -78,7 +78,7 @@ function get (req, res, next) {
     }
   }
 
-  console.log(5)
+
   url = params.get('url')
 
   if (!url) {
@@ -87,7 +87,7 @@ function get (req, res, next) {
     return res.end('url search param is required')
   }
 
-  console.log(6)
+
   // 1.0
   if (!params.has('ignoreReqHeaders')) {
     for (let header in req.headers) {
@@ -97,7 +97,7 @@ function get (req, res, next) {
     }
   }
 
-  console.log(7)
+
   // 1.1
   let forwardedFor = reqHeaders.get('X-Fowarded-For')
   reqHeaders.set('X-Fowarded-For', (forwardedFor ? forwardedFor + ',' : '') + req.connection.remoteAddress)
@@ -116,7 +116,7 @@ function get (req, res, next) {
     }
   }
 
-  console.log(8)
+
   // 1.3
   if (params.has('appendReqHeaders')) {
     try {
@@ -131,7 +131,7 @@ function get (req, res, next) {
     }
   }
 
-  console.log(9)
+
   // 1.4
   if (params.has('setReqHeaders')) {
     try {
@@ -146,7 +146,7 @@ function get (req, res, next) {
     }
   }
 
-  console.log(10)
+
   // 1.6
   if (params.has('body')) {
     body = Buffer.from(params.get('body'))
@@ -154,7 +154,7 @@ function get (req, res, next) {
     body = req
   }
 
-  console.log(11)
+
   // convert Headers to a object to make request able to handle them
   let headers = Object.create(null)
   for (let [k,v] of reqHeaders) {
@@ -162,11 +162,14 @@ function get (req, res, next) {
   }
 
   req.headers = headers
-  console.log(12)
+
   // 1.8
   var opts = {url, headers, method, followRedirect, body}
-
+  console.log(opts)
   request(opts) // GET the document that the user specified
+    .on('error', function(err) {
+      console.error(err)
+    })
     .on('response', page => {
       res.statusCode = page.statusCode;
 
