@@ -2,9 +2,7 @@ const restify = require('restify');
 const plugins = require('restify-plugins');
 var proxy = require('./proxy');
 
-const server = restify.createServer({
-    name: 'crossorigin.me'
-});
+const server = restify.createServer()
 
 const freeTier = plugins.throttle({
     rate: 3,
@@ -20,4 +18,4 @@ const freeTier = plugins.throttle({
 
 server.pre(freeTier, proxy.get)
 
-module.exports = server;
+module.exports = server
