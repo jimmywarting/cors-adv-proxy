@@ -165,15 +165,15 @@ function get (req, res, next) {
 
   // 1.8
   var opts = {url, headers, method, followRedirect, body}
-  console.log(opts)
+
   request(opts) // GET the document that the user specified
-    .on('error', function(err) {
+    .on('error', err => {
       console.error(err)
+      res.end('')
     })
     .on('response', page => {
       res.statusCode = page.statusCode;
 
-      console.log(13)
       // 2.0
       let responseHeaders = new Headers
       for (let header in page.headers) {
@@ -191,7 +191,6 @@ function get (req, res, next) {
         responseHeaders.delete(key)
       }
 
-      console.log(14)
       // 2.2
       for (let [key, val] of appendResHeaders) {
         responseHeaders.append(key, val)
@@ -202,7 +201,6 @@ function get (req, res, next) {
         responseHeaders.set(key, val)
       }
 
-      console.log(15)
       /*
        * Override everything else and expose all headers
        */
@@ -215,7 +213,6 @@ function get (req, res, next) {
 
       // must flush here -- otherwise pipe() will include the headers anyway!
       res.flushHeaders()
-      console.log(16)
     }).pipe(res)
 }
 
