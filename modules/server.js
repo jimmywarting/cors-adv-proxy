@@ -3,7 +3,7 @@ const plugins = require('restify-plugins');
 var proxy = require('./proxy');
 
 const server = restify.createServer({
-    name: false
+    name: 'cors-adv-proxy.herokuapp.com'
 });
 
 const freeTier = plugins.throttle({
