@@ -177,7 +177,7 @@ function get (req, res, next) {
       // 2.0
       let responseHeaders = new Headers
       for (let header in page.headers) {
-        if (header === 'location') key = 'location'
+        if (header.toLowerCase() === 'location') key = 'X-Cors-location'
         else if (header.toLowerCase() === 'set-cookie') key = 'X-Cors-Res-' + header
         else key = header
 
