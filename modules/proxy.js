@@ -165,7 +165,7 @@ function get (req, res, next) {
 
   // 1.8
   var opts = {url, headers, method, followRedirect, body}
-  var isRedirect = code => !!~[301,302,303,307,308].indexOf(~~code)
+  var isRedirect = code => [301,302,303,307,308].includes(~~code)
 
   request(opts) // GET the document that the user specified
     .on('error', err => {
@@ -175,13 +175,15 @@ function get (req, res, next) {
     .on('response', page => {
       res.statusCode = page.statusCode
 
+
+      // 2.0
+      let responseHeaders = new Headers
+
       if (isRedirect(res.statusCode)) {
         responseHeaders.append('X-Cors-Status', res.statusCode)
         res.statusCode = 200
       }
 
-      // 2.0
-      let responseHeaders = new Headers
       for (let header in page.headers) {
         if (header.toLowerCase() === 'location') key = 'X-Cors-location'
         else if (header.toLowerCase() === 'set-cookie') key = 'X-Cors-Res-' + header
