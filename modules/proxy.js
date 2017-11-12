@@ -175,7 +175,7 @@ function get (req, res, next) {
     .on('response', page => {
       res.statusCode = page.statusCode
 
-      if (!followRedirect && isRedirect(res.statusCode)) {
+      if (isRedirect(res.statusCode)) {
         responseHeaders.append('X-Cors-Status', res.statusCode)
         res.statusCode = 200
       }
