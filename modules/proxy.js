@@ -165,7 +165,7 @@ function get (req, res, next) {
 
   // 1.8
   var opts = {url, headers, method, followRedirect, body}
-  var isRedirect = code => [301,302,303,307,308].includes(code)
+  var isRedirect = code => !!~[301,302,303,307,308].indexOf(~~code)
 
   request(opts) // GET the document that the user specified
     .on('error', err => {
